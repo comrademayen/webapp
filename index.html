@@ -3,41 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contact Form</title>
+  <title>Debug & Contact Form</title>
   <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    .box { border: 1px solid #ccc; padding: 1rem; margin-bottom: 2rem; border-radius: 6px; }
+    button { padding: 8px 16px; }
+    pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; }
     .contact-form-wrapper {
-      max-width: 700px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: #f8f9fa;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-width: 700px; margin: 0 auto; padding: 2rem;
+      background: #f8f9fa; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .form-group { margin-bottom: 1.5rem; }
     input, textarea {
-      width: 100%; padding: 12px 15px;
-      border: 1px solid #dee2e6; border-radius: 6px;
+      width: 100%; padding: 12px 15px; border: 1px solid #dee2e6; border-radius: 6px;
       font-size: 16px; transition: border-color 0.3s ease;
     }
-    input:focus, textarea:focus {
-      border-color: #2563eb; outline: none;
-    }
+    input:focus, textarea:focus { border-color: #2563eb; outline: none; }
     .submit-btn {
-      position: relative; background: #2563eb; color: white;
-      padding: 14px 30px; border: none; border-radius: 6px;
-      cursor: pointer; font-size: 16px; transition: background 0.3s ease;
+      position: relative; background: #2563eb; color: white; padding: 14px 30px;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 16px;
+      transition: background 0.3s ease;
     }
     .submit-btn:hover { background: #1d4ed8; }
     .spinner {
       display: none; position: absolute; right: 15px; top: 50%;
       transform: translateY(-50%); width: 20px; height: 20px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top-color: white; border-radius: 50%;
-      animation: spin 1s linear infinite;
+      border: 3px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; animation: spin 1s linear infinite;
     }
-    @keyframes spin {
-      to { transform: translateY(-50%) rotate(360deg); }
-    }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
     .response-message {
       margin-top: 1.5rem; padding: 12px; border-radius: 6px;
       display: none; font-size: 14px;
@@ -52,7 +46,15 @@
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
-  <div data-aos-delay="600" class="col-lg-7 contact-input">
+
+  <div class="box">
+    <h2>1. Test Web App Connectivity</h2>
+    <button id="testGet">Test GET</button>
+    <pre id="getResult">Not tested yet.</pre>
+  </div>
+
+  <div class="box">
+    <h2>2. Contact Form</h2>
     <div class="contact-form-wrapper">
       <form id="contactForm">
         <div class="form-group">
@@ -72,8 +74,7 @@
         </div>
         <div class="form-group">
           <div class="g-recaptcha"
-               data-sitekey="6Lcncf0qAAAAADpkYIZd7AFUSRi37YRliE2PjQ9z">
-          </div>
+               data-sitekey="6Lcncf0qAAAAADpkYIZd7AFUSRi37YRliE2PjQ9z"></div>
         </div>
         <button type="submit" class="submit-btn">
           <span class="btn-text">SEND MESSAGE</span>
@@ -85,10 +86,24 @@
   </div>
 
   <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUdiP724fEEbv3q7YJ2piy5_dEHE9hxukt5TpwvrxjA1Po5bs6IvPuaNt4e7sAFNGa/exec';
+
+    // Test GET connectivity
+    document.getElementById('testGet').addEventListener('click', async () => {
+      const out = document.getElementById('getResult');
+      out.textContent = 'Loading…';
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const txt = await res.text();
+        out.textContent = `Status: ${res.status}\nResponse: ${txt}`;
+      } catch (err) {
+        out.textContent = `Error: ${err}`;
+      }
+    });
+
+    // Contact form logic
     document.addEventListener('DOMContentLoaded', () => {
       const contactForm = document.getElementById('contactForm');
-      const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbwUdiP724fEEbv3q7YJ2piy5_dEHE9hxukt5TpwvrxjA1Po5bs6IvPuaNt4e7sAFNGa/exec';
-
       contactForm.addEventListener('submit', async e => {
         e.preventDefault();
         const btn    = contactForm.querySelector('.submit-btn');
@@ -96,17 +111,15 @@
         const spin   = contactForm.querySelector('.spinner');
         const msgDiv = contactForm.querySelector('.response-message');
 
-        // Reset UI
         msgDiv.style.display = 'none';
         btn.disabled         = true;
-        txt.textContent      = 'Sending...';
+        txt.textContent      = 'Sending…';
         spin.style.display   = 'block';
 
         try {
           if (!grecaptcha.getResponse()) {
             throw new Error("Please complete the 'I’m not a robot' check");
           }
-
           const formData = new URLSearchParams(new FormData(contactForm));
           formData.append('g-recaptcha-response', grecaptcha.getResponse());
 
